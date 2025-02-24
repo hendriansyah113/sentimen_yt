@@ -9,9 +9,13 @@
     <div class="container mt-5">
         <h2 class="text-center">Analisis Sentimen Komentar YouTube</h2>
         <form method="POST" class="mb-4">
-            <input type="text" class="form-control" name="video_url" placeholder="Masukkan URL Video YouTube" required>
-            <button type="submit" class="btn btn-primary mt-2">Analisis</button>
+            <input type="text" class="form-control" name="keyword" placeholder="Masukkan Kata Kunci" required>
+            <button type="submit" class="btn btn-primary mt-2">Cari dan Analisis</button>
         </form>
+
+        {% if video_title %}
+        <h4>Video Trending Terkait: "{{ video_title }}"</h4>
+        {% endif %}
 
         {% if summary %}
         <h4>Hasil Sentimen:</h4>

@@ -9,7 +9,27 @@ API_KEY = 'AIzaSyBcemb0JmRgT70ivMJR2ooyR3_Lwlnse_0'
 YOUTUBE_API_SERVICE_NAME = 'youtube'
 YOUTUBE_API_VERSION = 'v3'
 
-# Fungsi untuk mengambil komentar dari YouTube
+# Fungsi untuk mencari video berdasarkan keyword
+def search_videos(keyword):
+    youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION, developerKey=API_KEY)
+    request = youtube.search().list(
+        part='snippet',
+        q=keyword,
+        type='video',
+        order='viewCount',  # Mengurutkan berdasarkan jumlah penonton terbanyak
+        maxResults=1  # Ambil 1 video paling populer
+    )
+    response = request.execute()
+    
+    video_id = None
+    video_title = None
+    if response['items']:
+        video_id = response['items'][0]['id']['videoId']
+        video_title = response['items'][0]['snippet']['title']
+    
+    return video_id, video_title
+
+# Fungsi untuk mengambil komentar dari video YouTube
 def get_comments(video_id):
     youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION, developerKey=API_KEY)
     comments = []
@@ -17,7 +37,7 @@ def get_comments(video_id):
     request = youtube.commentThreads().list(
         part='snippet',
         videoId=video_id,
-        maxResults=10000
+        maxResults=50
     )
     response = request.execute()
 
@@ -55,15 +75,17 @@ def analyze_sentiment(comments):
 def index():
     analyzed_comments = []
     sentiment_summary = {}
+    video_title = None
     
     if request.method == 'POST':
-        video_url = request.form['video_url']
-        video_id = video_url.split('v=')[1]
+        keyword = request.form['keyword']
+        video_id, video_title = search_videos(keyword)
         
-        comments = get_comments(video_id)
-        analyzed_comments, sentiment_summary = analyze_sentiment(comments)
+        if video_id:
+            comments = get_comments(video_id)
+            analyzed_comments, sentiment_summary = analyze_sentiment(comments)
     
-    return render_template('index.html', comments=analyzed_comments, summary=sentiment_summary)
+    return render_template('index.html', comments=analyzed_comments, summary=sentiment_summary, video_title=video_title)
 
 if __name__ == '__main__':
     app.run(debug=True)
