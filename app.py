@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request
 from googleapiclient.discovery import build
 from textblob import TextBlob
+from collections import Counter
+import re
+from routes.analisa_link import analisa_link_bp  # Import Blueprint
 
 app = Flask(__name__)
 
@@ -70,13 +73,34 @@ def analyze_sentiment(comments):
 
     return analyzed_comments, sentiment_results
 
+# Fungsi untuk Menghitung Frekuensi Kata
+def get_word_frequencies(comments):
+    all_comments = " ".join(comments)
+    
+    # Bersihkan teks: hilangkan simbol, angka, dan huruf kapital
+    words = re.findall(r'\b[a-zA-Z]{3,}\b', all_comments.lower())
+    
+    # Hitung frekuensi kata
+    word_count = Counter(words)
+    
+    # Ambil 10 kata paling sering muncul
+    most_common_words = word_count.most_common(10)
+    
+    # Format data untuk Chart.js
+    word_data = []
+    for word, freq in most_common_words:
+        word_data.append({"word": word, "freq": freq})
+        
+    return word_data
+
 # Route Utama
 @app.route('/', methods=['GET', 'POST'])
 def index():
     analyzed_comments = []
     sentiment_summary = {}
     video_title = None
-    
+    word_data = []
+
     if request.method == 'POST':
         keyword = request.form['keyword']
         video_id, video_title = search_videos(keyword)
@@ -84,8 +108,14 @@ def index():
         if video_id:
             comments = get_comments(video_id)
             analyzed_comments, sentiment_summary = analyze_sentiment(comments)
+            
+            # Dapatkan Data Word Cloud
+            word_data = get_word_frequencies(comments)
     
-    return render_template('index.html', comments=analyzed_comments, summary=sentiment_summary, video_title=video_title)
+    return render_template('index.html', comments=analyzed_comments, summary=sentiment_summary, video_title=video_title, word_data=word_data)
+
+# Register Blueprint
+app.register_blueprint(analisa_link_bp)
 
 if __name__ == '__main__':
     app.run(debug=True)
