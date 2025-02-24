@@ -16,8 +16,8 @@ def search_videos(keyword):
         part='snippet',
         q=keyword,
         type='video',
-        order='viewCount',  # Mengurutkan berdasarkan jumlah penonton terbanyak
-        maxResults=1  # Ambil 1 video paling populer
+        order='viewCount',
+        maxResults=1
     )
     response = request.execute()
     

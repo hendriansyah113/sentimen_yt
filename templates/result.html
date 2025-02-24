@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil Analisis Sentimen</title>
+</head>
+<body>
+    <h1>Hasil Analisis Sentimen untuk: {{ video_title }}</h1>
+    <a href="{{ video_url }}" target="_blank">Tonton Video di YouTube</a>
+    <h3>Grafik Sentimen:</h3>
+    <img src="{{ url_for('static', filename='sentiment_chart.png') }}" alt="Grafik Sentimen">
+    <h3>Detail Sentimen:</h3>
+    <ul>
+        <li>Positif: {{ sentiment_result['positif'] }}</li>
+        <li>Netral: {{ sentiment_result['netral'] }}</li>
+        <li>Negatif: {{ sentiment_result['negatif'] }}</li>
+    </ul>
+    <a href="{{ url_for('index') }}">Kembali ke Pencarian</a>
+</body>
+</html>
